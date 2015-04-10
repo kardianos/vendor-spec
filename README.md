@@ -32,7 +32,7 @@ struct {
 		// relative to GOPATH and the package is not currently copied
 		// locally.
 		// 
-		// Local should contain a trailing "/..." if the Import field also ends in "/...".
+		// Local should not contain a trailing "/...".
 		// Local should always use forward slashes.
 		Local string
 		
@@ -90,8 +90,12 @@ struct {
 	 rewritten. Tools are free to add a hash, but it should not be standard.
  * Q: Why not just re-use godeps meta-data file?
     - A: The godeps meta-data file includes the revision number in with
-	 the revision hash. It also lacks a Local field for adequate re-write
-	support and doesn't have a time of revision.
+	 the revision hash.
+	 It includes the go version number which is detramental in a team,
+	 escpecially when one team member is tasked with getting a product
+	 ready for the next Go version before that Go version is released.
+	 It also lacks a Local field for adequate re-write
+	 support and doesn't have a time of revision.
  * Q: Why record the name of the last tool to write out the vendor file?
     - A: If there is a malformed vendor file or re-writes that are found
 	 to be problematic, the tool used can then be traced back and corrected.
