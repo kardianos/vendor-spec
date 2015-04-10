@@ -91,8 +91,8 @@ struct {
  * Q: Why not just re-use godeps meta-data file?
     - A: The godeps meta-data file includes the revision number in with
 	 the revision hash.
-	 It includes the go version number which is detramental in a team,
-	 escpecially when one team member is tasked with getting a product
+	 It includes the go version number which is detrimental in a team,
+	 especially when one team member is tasked with getting a product
 	 ready for the next Go version before that Go version is released.
 	 It also lacks a Local field for adequate re-write
 	 support and doesn't have a time of revision.
