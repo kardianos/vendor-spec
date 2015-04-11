@@ -97,10 +97,10 @@ A vendor tool is allowed to write a superset of fields in the file. To know
 how to interpret these fields the name of the tool must be known.
 
 ### Import and Local fields
-The Import field is the path that would be used to fetch it remotely,
-the "go get" text. The Local field is the path to the package relative
+The Import field is the path that would be used to fetch the non-copied version
+from GOPATH, the "go get" path. The Local field is the path to the package relative
 to the "internal" directory. The Local field may not have the path elements
-"." and "..". For example, if the Local field was "fmt", packages would import
+"." or "..". For example, if the Local field was "fmt", packages would import
 it from "path/to/pkg/internal/fmt".
 
 While it is usually ideal to not vendor a package that also vendors packages,
