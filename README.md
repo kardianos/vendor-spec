@@ -37,7 +37,8 @@ struct {
 		// locally.
 		// 
 		// Local should not contain a trailing "/...".
-		// Local should always use forward slashes.
+		// Local should always use forward slashes and must not contain the
+		// path elements "." or "..".
 		Local string
 		
 		// The version of the package. This field must be persisted by all
