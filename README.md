@@ -5,14 +5,15 @@
  * The vendor packages should be placed in an "internal" directory.
  * The meta-data file describing the vendor's packages will be referred to as
     the vendor file.
- * The vendor file will be in the "internal" folder called "vendor.json".
+ * The vendor file will be in the "internal" folder and be called "vendor.json".
  * The vendor file describes the vendor's packages rooted in the same "internal"
     folder.
  * The vendor file must contain a minimum set of fields.
  * Additional fields may be added to the vendor file that is tool specific.
  * The vendor file is to be used by a vendor tool; the vendor file is not used
-    for building.
- * The following struct describes the minimum fields present in the json file:
+    for compiling source code.
+ * The following struct describes the minimum fields that must be present in
+    the json file:
 
 ```
 struct {
@@ -91,18 +92,17 @@ struct {
 ```
 
 ### Tool field
-Knowing what tool created the file will be useful in gathering statistics.
-It will also be useful to know when addressing blame to a file re-write or
-vendor file information.
+A vendor tool is allowed to write a superset of fields in the file. To know
+how to interpret these fields the name of the tool must be known.
 
 ### Import and Local fields
-While it is usually ideal to not vendor a package that also vendor's packages,
-there are cases where there are not other options. Sometimes useful packages
+While it is usually ideal to not vendor a package that also vendors packages,
+there are cases where there are no other options. Sometimes useful packages
 are developed in the context of an executable. Sometimes it is useful to make
-modifications to the standard library and vendor them in a package. This is
+modifications to the standard library and vendor them with a package. This is
 what the azure sdk and heartbleed detectors do.
 
-By separating out the remote (go get) path from the local internal path
+By separating out the remote (go get) path from the local internal path,
 a tool can detect when a standard library package is vendored and take steps
 to prevent duplicating imports. Without the Local field a tool will be unable
 to detect when a standard library package is being vendored and it will
@@ -116,14 +116,14 @@ semantics are not. The Version field must either be empty or contain a single
 value that can be used to fetch a specific version. The VersionTime must be
 empty or have a valid RFC3339 time string. If the Version field is non-empty
 the VersionTime field must correlate with the Version field. If the Version
-field is empty the VersionTime meaning tool specific.
+field is empty the meaning of the VersionTime field is tool specific.
 
 ### Open Questions
- * JSON document do not support comments and are less friendly for a human
+ * JSON documents do not support comments and are less friendly for a human
     to read and write then something like toml. However toml is not supported
-	in the standard library.
+	in the standard library, nor is the specification complete.
 	We could define a format just for this, perhaps similar to a ini file
-	or custom comments in go code, but that is not the problem domain.
+	or custom comments in go code, but that is not the problem being solved.
 	That being said, I could see a sub-set of toml defined and used.
 	Only support string values, tables, and comments.
 
@@ -146,8 +146,9 @@ VersionTime = "2015-04-07T09:07:157Z-07:00"
     I think it does but I have no proof of concept yet to verify this.
 
 ### A Rational for Package Copying and Import Path Re-writing
-It is a desired trait to build code after fetching or updating the source. It
-has been observed that non-trivial packages modifying the GOPATH with a internal
+It is a desired trait to build code after fetching or updating the source
+without an additional command. It has been observed that for non-trivial
+packages appending the GOPATH with an internal
 vendor root is problematic. The Go maintainers will not re-define or add to
 the method used to build packages. It is a firm requirement for many projects,
 especially commercial projects, to keep a local copy of everything that is
@@ -161,7 +162,7 @@ outlined in the first paragraph.
 
 The only solution that meets all the needs in the first paragraph is copying
 the source to the project and re-writing the import paths. Not liking the
-solution does not make the problem disappear or make needs change.
+solution does not make the problem disappear or make the needs change.
 
 ### FAQ
  * Q: Why include a "Local" field? We should just use fully qualified names.
