@@ -156,8 +156,8 @@ used to build the product and use that copy whenever the product is built.
 There are many users of Go who do not agree with the above statements or do
 not require all the source to be kept with the product. For example, some
 users only require a path to the remote repository and a version to use.
-For some uses to have a more relaxed need does not alleviate the needs outlined
-in the first paragraph.
+The presence of users with more relaxed needs does not alleviate the needs
+outlined in the first paragraph.
 
 The only solution that meets all the needs in the first paragraph is copying
 the source to the project and re-writing the import paths. Not liking the
