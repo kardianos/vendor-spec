@@ -16,7 +16,10 @@
 
 ```
 struct {
-	Tool string // Free text field describing the tool that last wrote this file.
+	// The name of the tool last used to write this file.
+	// This is not necessarily the name of the executable as that will
+	// vary based on platform.
+	Tool string
 	
 	List []struct {
 		// Import path. Example "rsc.io/pdf".
@@ -53,7 +56,7 @@ struct {
 ### Example
 *vendor file path: "$GOPATH/src/github.com/kardianos/mypkg/internal/vendor.json"*
 
-*vendor package copied to: "$GOPATH/src/github.com/kardianos/mypkg/internal/pdf"*
+*first package copied to: "$GOPATH/src/github.com/kardianos/mypkg/internal/rsc.io/pdf"*
 
 ```
 {
@@ -61,17 +64,107 @@ struct {
 	"List": [
 		{
 			"Import": "rsc.io/pdf",
-			"Local": "pdf",
+			"Local": "rsc.io/pdf",
 			"Version": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
 			"VersionTime": "2014-09-25T17:07:18Z-04:00"
+		},
+		{
+			"Import": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
+			"Local": "crypto/tls",
+			"Version": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
+			"VersionTime": "2015-04-07T09:07:157Z-07:00"
+		},
+		{
+			"Import": "github.com/coreos/etcd/raft",
+			"Local": "github.com/coreos/etcd/raft",
+			"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+			"VersionTime": "2015-04-09T05:06:17Z-08:00"
+		},
+		{
+			"Import": "github.com/coreos/etcd/internal/golang.org/x/net/context",
+			"Local": "golang.org/x/net/context",
+			"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+			"VersionTime": "2015-04-09T05:06:17Z-08:00"
 		}
 	]
 }
 ```
 
+### Tool field
+Knowing what tool created the file will be useful in gathering statistics.
+It will also be useful to know when addressing blame to a file re-write or
+vendor file information.
+
+### Import and Local fields
+While it is usually ideal to not vendor a package that also vendor's packages,
+there are cases where there are not other options. Sometimes useful packages
+are developed in the context of an executable. Sometimes it is useful to make
+modifications to the standard library and vendor them in a package. This is
+what the azure sdk and heartbleed detectors do.
+
+By separating out the remote (go get) path from the local internal path
+a tool can detect when a standard library package is vendored and take steps
+to prevent duplicating imports. Without the Local field a tool will be unable
+to detect when a standard library package is being vendored and it will
+be unable to re-write the import path to be shorter without losing information.
+
+### Version and VersionTime fields
+Both version fields are optional. However tools must persist any information
+present in them. The interpretation of both fields is dependent on the tool
+itself. While the exact interpretation of the fields are tool specific, the
+semantics are not. The Version field must either be empty or contain a single
+value that can be used to fetch a specific version. The VersionTime must be
+empty or have a valid RFC3339 time string. If the Version field is non-empty
+the VersionTime field must correlate with the Version field. If the Version
+field is empty the VersionTime meaning tool specific.
+
+### Open Questions
+ * JSON document do not support comments and are less friendly for a human
+    to read and write then something like toml. However toml is not supported
+	in the standard library.
+	We could define a format just for this, perhaps similar to a ini file
+	or custom comments in go code, but that is not the problem domain.
+	That being said, I could see a sub-set of toml defined and used.
+	Only support string values, tables, and comments.
+
+```
+Tool = "go vendor"
+# Read the content of the PDF from the azure service.
+[[List]]
+Import = "rsc.io/pdf"
+Local = "rsc.io/pdf"
+Version = "3a3aeae79a3ec4f6d093a6b036c24698938158f3"
+VersionTime = "2014-09-25T17:07:18Z-04:00"
+[[List]]
+Import = "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls"
+Local = "crypto/tls"
+Version = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
+VersionTime = "2015-04-07T09:07:157Z-07:00"
+```
+
+ * Will this contain enough information for trees of vendor packages?
+    I think it does but I have no proof of concept yet to verify this.
+
+### A Rational for Package Copying and Import Path Re-writing
+It is a desired trait to build code after fetching or updating the source. It
+has been observed that non-trivial packages modifying the GOPATH with a internal
+vendor root is problematic. The Go maintainers will not re-define or add to
+the method used to build packages. It is a firm requirement for many projects,
+especially commercial projects, to keep a local copy of everything that is
+used to build the product and use that copy whenever the product is built.
+
+There are many users of Go who do not agree with the above statements or do
+not require all the source to be kept with the product. For example, some
+users only require a path to the remote repository and a version to use.
+For some uses to have a more relaxed need does not alleviate the needs outlined
+in the first paragraph.
+
+The only solution that meets all the needs in the first paragraph is copying
+the source to the project and re-writing the import paths. Not liking the
+solution does not make the problem disappear or make needs change.
+
 ### FAQ
- * Q: Why include a "Local" field? Isn't that just extra information?
-    Shouldn't we always use fully qualified names?
+ * Q: Why include a "Local" field? We should just use fully qualified names.
      - A: Cases sometimes arise where the top level main package must import
 	 a package that also vendors packages. If the top level main package
 	 also uses these packages then the import paths become extra long.
@@ -86,14 +179,13 @@ struct {
 	 version control systems. Centralized systems should just use Version.
  * Q: Why not contain a hash of each package to ensure the package
     doesn't change?
-    - A: The copied package will likely change when the imports are
-	 rewritten. Tools are free to add a hash, but it should not be standard.
+    - A: The copied package will change when the imports are
+	 rewritten. Tools are free to add a hash, but it is not standard.
  * Q: Why not just re-use godeps meta-data file?
     - A: The godeps meta-data file includes the revision number in with
 	 the revision hash.
-	 It includes the go version number which is detrimental in a team,
-	 especially when one team member is tasked with getting a product
-	 ready for the next Go version before that Go version is released.
+	 It includes the go version number which is detrimental in a team
+	 with multiple go version, common when testing a new go release.
 	 It also lacks a Local field for adequate re-write
 	 support and doesn't have a time of revision.
  * Q: Why record the name of the last tool to write out the vendor file?
@@ -111,4 +203,3 @@ struct {
 	 then that's extra information for a human to manage the package.
 	 Machines only need to know what a package used to be called
 	 (the "Import") and what they can be found once copied (the "Local").
-	 Version information is just common extra information.
