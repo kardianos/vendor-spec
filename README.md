@@ -91,6 +91,15 @@ struct {
 	]
 }
 ```
+*The above example would have the import paths as follows:*
+```
+import (
+	"github.com/kardianos/mypkg/internal/rsc.io/pdf"
+	"github.com/kardianos/mypkg/internal/crypto/tls"
+	"github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft"
+	"github.com/kardianos/mypkg/internal/golang.org/x/net/context"
+)
+```
 
 ### Tool field
 A vendor tool is allowed to write a superset of fields in the file. To know
