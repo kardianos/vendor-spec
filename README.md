@@ -150,9 +150,6 @@ Version = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
 VersionTime = "2015-04-07T09:07:157Z-07:00"
 ```
 
- * Will this contain enough information for trees of vendor packages?
-    I think it does but I have no proof of concept yet to verify this.
-
 ### A Rational for Package Copying and Import Path Re-writing
 It is a desired trait to build code after fetching or updating the source
 without an additional command. It has been observed that for non-trivial
