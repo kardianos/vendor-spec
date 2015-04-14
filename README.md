@@ -23,20 +23,15 @@ struct {
 	Tool string
 	
 	List []struct {
-		// Import path. Example "rsc.io/pdf".
-		// go get <Import> should fetch the remote package.
-		//
-		// If Import ends in "/..." the tool should manage all packages below 
-		// the import as well.
-		Import string
+		// Vendor import path. Example "rsc.io/pdf".
+		// go get <Vendor> should fetch the remote vendor package.
+		Vendor string
 		
-		// Package path relative to "internal" folder.
-		// Examples: "rsc.io/pdf", "pdf".
-		// If Local is an empty string, the tool should assume the path is
-		// relative to GOPATH and the package is not currently copied
-		// locally.
+		// Package path as found in GOPATH.
+		// Examples: "path/to/mypkg/internal/rsc.io/pdf".
+		// If Local is an empty string, the tool should assume the
+		// package is not currently copied locally.
 		// 
-		// Local should not contain a trailing "/...".
 		// Local should always use forward slashes and must not contain the
 		// path elements "." or "..".
 		Local string
@@ -65,26 +60,26 @@ struct {
 	"Tool": "go vendor",
 	"List": [
 		{
-			"Import": "rsc.io/pdf",
-			"Local": "rsc.io/pdf",
+			"Vendor": "rsc.io/pdf",
+			"Local": "github.com/kardianos/mypkg/internal/rsc.io/pdf",
 			"Version": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
 			"VersionTime": "2014-09-25T17:07:18Z-04:00"
 		},
 		{
-			"Import": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
-			"Local": "crypto/tls",
+			"Vendor": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
+			"Local": "github.com/kardianos/mypkg/internal/crypto/tls",
 			"Version": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
 			"VersionTime": "2015-04-07T09:07:157Z-07:00"
 		},
 		{
-			"Import": "github.com/coreos/etcd/raft",
-			"Local": "github.com/coreos/etcd/raft",
+			"Vendor": "github.com/coreos/etcd/raft",
+			"Local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
 			"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"VersionTime": "2015-04-09T05:06:17Z-08:00"
 		},
 		{
-			"Import": "github.com/coreos/etcd/internal/golang.org/x/net/context",
-			"Local": "golang.org/x/net/context",
+			"Vendor": "github.com/coreos/etcd/internal/golang.org/x/net/context",
+			"Local": "github.com/kardianos/mypkg/internal/golang.org/x/net/context",
 			"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"VersionTime": "2015-04-09T05:06:17Z-08:00"
 		}
@@ -105,12 +100,11 @@ import (
 A vendor tool is allowed to write a superset of fields in the file. To know
 how to interpret these fields the name of the tool must be known.
 
-### Import and Local fields
-The Import field is the path that would be used to fetch the non-copied version
-from GOPATH, the "go get" path. The Local field is the path to the package relative
-to the "internal" directory. The Local field may not have the path elements
-"." or "..". For example, if the Local field was "fmt", packages would import
-it from "path/to/pkg/internal/fmt".
+### Vendor and Local fields
+The Vendor field is the path that would be used to fetch the non-copied version
+from GOPATH, the "go get" path. The Local field is the path to the package
+in GOPATH. The Local field may not have the path elements
+"." or "..".
 
 While it is usually ideal to not vendor a package that also vendors packages,
 there are cases where there are no other options. Sometimes useful packages
@@ -121,8 +115,7 @@ what the azure sdk and heartbleed detectors do.
 By separating out the remote (go get) path from the local internal path,
 a tool can detect when a standard library package is vendored and take steps
 to prevent duplicating imports. Without the Local field a tool will be unable
-to detect when a standard library package is being vendored and it will
-be unable to re-write the import path to be shorter without losing information.
+to re-write the import path to be shorter without losing information.
 
 ### Version and VersionTime fields
 Both version fields are optional. However tools must persist any information
@@ -147,13 +140,13 @@ field is empty the meaning of the VersionTime field is tool specific.
 Tool = "go vendor"
 # Read the content of the PDF from the azure service.
 [[List]]
-Import = "rsc.io/pdf"
-Local = "rsc.io/pdf"
+Vendor = "rsc.io/pdf"
+Local = "github.com/kardianos/mypkg/internal/rsc.io/pdf"
 Version = "3a3aeae79a3ec4f6d093a6b036c24698938158f3"
 VersionTime = "2014-09-25T17:07:18Z-04:00"
 [[List]]
-Import = "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls"
-Local = "crypto/tls"
+Vendor = "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls"
+Local = "github.com/kardianos/mypkg/internal/crypto/tls"
 Version = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
 VersionTime = "2015-04-07T09:07:157Z-07:00"
 ```
@@ -219,4 +212,4 @@ solution does not make the problem disappear or make the needs change.
 	 If a vendor tool is able to sniff out the source control version and time
 	 then that's extra information for a human to manage the package.
 	 Machines only need to know what a package used to be called
-	 (the "Import") and what they can be found once copied (the "Local").
+	 (the "Vendor") and what they can be found once copied (the "Local").
