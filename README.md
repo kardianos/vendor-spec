@@ -17,12 +17,11 @@
 
 ```
 struct {
-	// The name of the tool last used to write this file.
-	// This is not necessarily the name of the executable as that will
-	// vary based on platform.
+	// The import path of the tool used to write this file.
+	// Examples: "github.com/kardianos/vendor" or "golang.org/x/tools/cmd/vendor".
 	Tool string
 	
-	List []struct {
+	Package []struct {
 		// Vendor import path. Example "rsc.io/pdf".
 		// go get <Vendor> should fetch the remote vendor package.
 		Vendor string
@@ -57,8 +56,8 @@ struct {
 
 ```
 {
-	"Tool": "go vendor",
-	"List": [
+	"Tool": "github.com/kardianos/vendor",
+	"Package": [
 		{
 			"Vendor": "rsc.io/pdf",
 			"Local": "github.com/kardianos/mypkg/internal/rsc.io/pdf",
@@ -137,14 +136,14 @@ field is empty the meaning of the VersionTime field is tool specific.
 	Only support string values, tables, and comments.
 
 ```
-Tool = "go vendor"
+Tool = "github.com/kardianos/vendor"
 # Read the content of the PDF from the azure service.
-[[List]]
+[[Package]]
 Vendor = "rsc.io/pdf"
 Local = "github.com/kardianos/mypkg/internal/rsc.io/pdf"
 Version = "3a3aeae79a3ec4f6d093a6b036c24698938158f3"
 VersionTime = "2014-09-25T17:07:18Z-04:00"
-[[List]]
+[[Package]]
 Vendor = "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls"
 Local = "github.com/kardianos/mypkg/internal/crypto/tls"
 Version = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
