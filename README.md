@@ -150,6 +150,15 @@ Version = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
 VersionTime = "2015-04-07T09:07:157Z-07:00"
 ```
 
+* Should the VersionTime field be present? It isn't needed for any mechanical
+    process, but a maintainer 5 years later may find it useful to pin-point
+    what time period that code was from.
+
+* Is it practical to support vendoring std library packages? Sometimes done
+    to work around a bug or limitation in the currently released std package.
+    Examples include forking crypto/tls to connect to azure, dwarf for debugging,
+    crypto/tls to test for the heart bleed attack.
+
 ### A Rational for Package Copying and Import Path Re-writing
 It is a desired trait to build code after fetching or updating the source
 without an additional command. It has been observed that for non-trivial
@@ -188,12 +197,11 @@ solution does not make the problem disappear or make the needs change.
     - A: The copied package will change when the imports are
 	 rewritten. Tools are free to add a hash, but it is not standard.
  * Q: Why not just re-use godeps meta-data file?
-    - A: The godeps meta-data file includes the revision number in with
-	 the revision hash.
-	 It includes the go version number which is detrimental in a team
-	 with multiple go version, common when testing a new go release.
-	 It also lacks a Local field for adequate re-write
-	 support and doesn't have a time of revision.
+    - A: Godep (github.com/tools/godep) is a great tool with a nice meta-data
+	 file. It can serve as a good base for a standard.
+	 The go version is not helpful and can be harmful as different developers
+	 may be on different versions, changing it each time.
+	 It was designed to support a local GOPATH, so it lacks the Local field.
  * Q: Why record the name of the last tool to write out the vendor file?
     - A: If there is a malformed vendor file or re-writes that are found
 	 to be problematic, the tool used can then be traced back and corrected.
@@ -209,3 +217,20 @@ solution does not make the problem disappear or make the needs change.
 	 then that's extra information for a human to manage the package.
 	 Machines only need to know what a package used to be called
 	 (the "Vendor") and what they can be found once copied (the "Local").
+  * Q: Seriously, can't we rely on github to stay around and just pin the version?
+     - A: I've maintained line of business applications that are over 15 years
+	    old. In one case many of the dependent third-party components
+		were no longer available. A re-write eventually took nearly a year to
+		complete. Companies that are more then a few years old will
+		have legacy programs. Libraries will drop off the face of the Earth.
+ * Q: What if we just copied the vendor code to the repository, then copy them to
+    the GOPATH locations after a fetch? I don't like the idea of import re-writes.
+    - A: If you setup one project per GOPATH it would mostly work ("go get"
+		wouldn't work). However, if two projects that shared the same GOPATH
+		relied on the same vendor package, but different versions, then one vendor package
+		would clobber the other vendor package. This approach doesn't work when scaling
+		a company code base.
+ * Q: What about putting the hash or similar version in each package folder path?
+    - A: I'd be interested to see the tool that took this approach. I'm not
+	    convinced that it would be practical or that it could be done without
+		modifying the "go" command.
