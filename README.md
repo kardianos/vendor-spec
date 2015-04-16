@@ -18,6 +18,9 @@ go get -u github.com/kardianos/vendor
  * Additional fields may be added to the vendor file that is tool specific.
  * The vendor file is to be used by a vendor tool; the vendor file is not used
     for compiling source code.
+ * Each copied package entry is defined to match a single Go package. A
+    vendor file Package entry does NOT match a package tree; a vendor file
+	Package entry maches a single Go package.
  * The following struct describes the minimum fields that must be present in
     the json file:
 
