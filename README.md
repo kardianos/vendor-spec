@@ -1,5 +1,11 @@
-## The Go vendor file specification.
+## The Go vendor file specification
 
+The tool that implements this specification can be installed by running:
+```
+go get -u github.com/kardianos/vendor
+```
+
+### Specification
  * Copying third-party vendor packages into a local project structure requires
     a meta-data file describing the vendor's packages.
  * The vendor packages should be placed in an "internal" directory.
