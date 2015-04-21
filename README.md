@@ -104,6 +104,48 @@ import (
 )
 ```
 
+### Proposed addition to support version pinning and GOPATH modifications
+In each Package struct, add the field "ImportAs string". Valid values are
+"vendor" and "local". If the value is "vendor", then the import path is expected
+to be the value of the "Vendor" field. If the value is "local", the import
+path is expected to be the "Local" field.
+
+Version pinning example (Package struct item only):
+```
+{
+	"Vendor": "github.com/coreos/etcd/raft",
+	"Local": "github.com/coreos/etcd/raft",
+	"ImportAs": "vendor",
+	"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+	"VersionTime": "2015-04-09T05:06:17Z-08:00"
+}
+```
+
+GOPATH modify (godep save) example (Package struct item only):
+```
+{
+	"Vendor": "github.com/coreos/etcd/raft",
+	"Local": "github.com/kardianos/mypkg/internal/src/github.com/coreos/etcd/raft",
+	"ImportAs": "vendor",
+	"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+	"VersionTime": "2015-04-09T05:06:17Z-08:00"
+}
+```
+
+Import path rewrite example (Package struct item only):
+```
+{
+	"Vendor": "github.com/coreos/etcd/raft",
+	"Local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
+	"ImportAs": "local",
+	"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+	"VersionTime": "2015-04-09T05:06:17Z-08:00"
+}
+```
+
+In all cases the "Local" field points to where the package sits on disk within
+the GOPATH. The "Vendor" field always gives the original vendor's import path.
+
 ### Tool field
 A vendor tool is allowed to write a superset of fields in the file. To know
 how to interpret these fields the name of the tool must be known.
