@@ -108,7 +108,8 @@ import (
 In each Package struct, add the field "ImportAs string". Valid values are
 "vendor" and "local". If the value is "vendor", then the import path is expected
 to be the value of the "Vendor" field. If the value is "local", the import
-path is expected to be the "Local" field.
+path is expected to be the "Local" field. If the "ImportAs" value is omitted,
+the default will be treated as "vendor".
 
 Version pinning example (Package struct item only):
 ```
