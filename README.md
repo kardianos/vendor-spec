@@ -21,15 +21,14 @@ go get -u github.com/kardianos/vendor
  * Each copied package entry is defined to match a single Go package. A
     vendor file Package entry does NOT match a package tree; a vendor file
 	Package entry maches a single Go package.
+ * A tool MUST persist any unknown fields when reading and writing out the
+    vendor file. A tool may remove unknown fields on an explicit user request.
+	This implies that a tool must not marshal or unmarshal from a known struct.
  * The following struct describes the minimum fields that must be present in
     the json file:
 
 ```
 struct {
-	// The import path of the tool used to write this file.
-	// Examples: "github.com/kardianos/vendor" or "golang.org/x/tools/cmd/vendor".
-	Tool string
-	
 	// Comment is free text for human use.
 	Comment string
 	
@@ -71,7 +70,6 @@ struct {
 
 ```
 {
-	"Tool": "github.com/kardianos/vendor",
 	"Package": [
 		{
 			"Vendor": "rsc.io/pdf",
@@ -152,10 +150,6 @@ Import path rewrite example (Package struct item only):
 
 In all cases the "Local" field points to where the package sits on disk within
 the GOPATH. The "Vendor" field always gives the original vendor's import path.
-
-### Tool field
-A vendor tool is allowed to write a superset of fields in the file. To know
-how to interpret these fields the name of the tool must be known.
 
 ### Vendor and Local fields
 The Vendor field is the path that would be used to fetch the non-copied revision
