@@ -30,6 +30,9 @@ struct {
 	// Examples: "github.com/kardianos/vendor" or "golang.org/x/tools/cmd/vendor".
 	Tool string
 	
+	// Comment is free text for human use.
+	Comment string
+	
 	Package []struct {
 		// Vendor import path. Example "rsc.io/pdf".
 		// go get <Vendor> should fetch the remote vendor package.
@@ -54,6 +57,9 @@ struct {
 		// RevisionTime is the time the revision was created. The time should be
 		// parsed and written in the "time.RFC3339" format.
 		RevisionTime string
+		
+		// Comment is free text for human use.
+		Comment string
 	}
 }
 ```
