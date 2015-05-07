@@ -44,16 +44,16 @@ struct {
 		// path elements "." or "..".
 		Local string
 		
-		// The version of the package. This field must be persisted by all
+		// The revision of the package. This field must be persisted by all
 		// tools, but not all tools will interpret this field.
-		// The value of Version should be a single value that can be used
-		// to fetch the same or similar version.
+		// The value of Revision should be a single value that can be used
+		// to fetch the same or similar revision.
 		// Examples: "abc104...438ade0", "v1.3.5"
-		Version string
+		Revision string
 		
-		// VersionTime is the time the version was created. The time should be
+		// RevisionTime is the time the revision was created. The time should be
 		// parsed and written in the "time.RFC3339" format.
-		VersionTime string
+		RevisionTime string
 	}
 }
 ```
@@ -70,26 +70,26 @@ struct {
 		{
 			"Vendor": "rsc.io/pdf",
 			"Local": "github.com/kardianos/mypkg/internal/rsc.io/pdf",
-			"Version": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
-			"VersionTime": "2014-09-25T17:07:18Z-04:00"
+			"Revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
+			"RevisionTime": "2014-09-25T17:07:18Z-04:00"
 		},
 		{
 			"Vendor": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
 			"Local": "github.com/kardianos/mypkg/internal/crypto/tls",
-			"Version": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
-			"VersionTime": "2015-04-07T09:07:157Z-07:00"
+			"Revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
+			"RevisionTime": "2015-04-07T09:07:157Z-07:00"
 		},
 		{
 			"Vendor": "github.com/coreos/etcd/raft",
 			"Local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
-			"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"VersionTime": "2015-04-09T05:06:17Z-08:00"
+			"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+			"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 		},
 		{
 			"Vendor": "github.com/coreos/etcd/internal/golang.org/x/net/context",
 			"Local": "github.com/kardianos/mypkg/internal/golang.org/x/net/context",
-			"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"VersionTime": "2015-04-09T05:06:17Z-08:00"
+			"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+			"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 		}
 	]
 }
@@ -104,21 +104,21 @@ import (
 )
 ```
 
-### Proposed addition to support version pinning and GOPATH modifications
+### Proposed addition to support revision pinning and GOPATH modifications
 In each Package struct, add the field "ImportAs string". Valid values are
 "vendor" and "local". If the value is "vendor", then the import path is expected
 to be the value of the "Vendor" field. If the value is "local", the import
 path is expected to be the "Local" field. If the "ImportAs" value is omitted,
 the default will be treated as "vendor".
 
-Version pinning example (Package struct item only):
+Revision pinning example (Package struct item only):
 ```
 {
 	"Vendor": "github.com/coreos/etcd/raft",
 	"Local": "github.com/coreos/etcd/raft",
 	"ImportAs": "vendor",
-	"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"VersionTime": "2015-04-09T05:06:17Z-08:00"
+	"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+	"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 }
 ```
 
@@ -128,8 +128,8 @@ GOPATH modify (godep save) example (Package struct item only):
 	"Vendor": "github.com/coreos/etcd/raft",
 	"Local": "github.com/kardianos/mypkg/internal/src/github.com/coreos/etcd/raft",
 	"ImportAs": "vendor",
-	"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"VersionTime": "2015-04-09T05:06:17Z-08:00"
+	"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+	"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 }
 ```
 
@@ -139,8 +139,8 @@ Import path rewrite example (Package struct item only):
 	"Vendor": "github.com/coreos/etcd/raft",
 	"Local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
 	"ImportAs": "local",
-	"Version": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"VersionTime": "2015-04-09T05:06:17Z-08:00"
+	"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
+	"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 }
 ```
 
@@ -152,7 +152,7 @@ A vendor tool is allowed to write a superset of fields in the file. To know
 how to interpret these fields the name of the tool must be known.
 
 ### Vendor and Local fields
-The Vendor field is the path that would be used to fetch the non-copied version
+The Vendor field is the path that would be used to fetch the non-copied revision
 from GOPATH, the "go get" path. The Local field is the path to the package
 in GOPATH. The Local field may not have the path elements
 "." or "..".
@@ -168,15 +168,15 @@ a tool can detect when a standard library package is vendored and take steps
 to prevent duplicating imports. Without the Local field a tool will be unable
 to re-write the import path to be shorter without losing information.
 
-### Version and VersionTime fields
-Both version fields are optional. However tools must persist any information
+### Revision and RevisionTime fields
+Both revision fields are optional. However tools must persist any information
 present in them. The interpretation of both fields is dependent on the tool
 itself. While the exact interpretation of the fields are tool specific, the
-semantics are not. The Version field must either be empty or contain a single
-value that can be used to fetch a specific version. The VersionTime must be
-empty or have a valid RFC3339 time string. If the Version field is non-empty
-the VersionTime field must correlate with the Version field. If the Version
-field is empty the meaning of the VersionTime field is tool specific.
+semantics are not. The Revision field must either be empty or contain a single
+value that can be used to fetch a specific revision. The RevisionTime must be
+empty or have a valid RFC3339 time string. If the Revision field is non-empty
+the RevisionTime field must correlate with the Revision field. If the Revision
+field is empty the meaning of the RevisionTime field is tool specific.
 
 ### Open Questions
  * JSON documents do not support comments and are less friendly for a human
@@ -193,16 +193,16 @@ Tool = "github.com/kardianos/vendor"
 [[Package]]
 Vendor = "rsc.io/pdf"
 Local = "github.com/kardianos/mypkg/internal/rsc.io/pdf"
-Version = "3a3aeae79a3ec4f6d093a6b036c24698938158f3"
-VersionTime = "2014-09-25T17:07:18Z-04:00"
+Revision = "3a3aeae79a3ec4f6d093a6b036c24698938158f3"
+RevisionTime = "2014-09-25T17:07:18Z-04:00"
 [[Package]]
 Vendor = "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls"
 Local = "github.com/kardianos/mypkg/internal/crypto/tls"
-Version = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
-VersionTime = "2015-04-07T09:07:157Z-07:00"
+Revision = "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a"
+RevisionTime = "2015-04-07T09:07:157Z-07:00"
 ```
 
-* Should the VersionTime field be present? It isn't needed for any mechanical
+* Should the RevisionTime field be present? It isn't needed for any mechanical
     process, but a maintainer 5 years later may find it useful to pin-point
     what time period that code was from.
 
@@ -222,7 +222,7 @@ used to build the product and use that copy whenever the product is built.
 
 There are many users of Go who do not agree with the above statements or do
 not require all the source to be kept with the product. For example, some
-users only require a path to the remote repository and a version to use.
+users only require a path to the remote repository and a revision to use.
 The presence of users with more relaxed needs does not alleviate the needs
 outlined in the first paragraph.
 
@@ -243,7 +243,7 @@ solution does not make the problem disappear or make the needs change.
 	 vendor package's paths.
  * Q: Why omit the revision number?
     - A: revision numbers are not guaranteed to be sequential in distributed
-	 version control systems. Centralized systems should just use Version.
+	 version control systems. Centralized systems should just use Revision.
  * Q: Why not contain a hash of each package to ensure the package
     doesn't change?
     - A: The copied package will change when the imports are
@@ -252,7 +252,7 @@ solution does not make the problem disappear or make the needs change.
     - A: Godep (github.com/tools/godep) is a great tool with a nice meta-data
 	 file. It can serve as a good base for a standard.
 	 The go version is not helpful and can be harmful as different developers
-	 may be on different versions, changing it each time.
+	 may be on different version, changing it each time.
 	 It was designed to support a local GOPATH, so it lacks the Local field.
  * Q: Why record the name of the last tool to write out the vendor file?
     - A: If there is a malformed vendor file or re-writes that are found
@@ -265,11 +265,11 @@ solution does not make the problem disappear or make the needs change.
 	 is testing on the Go master branch.
  * Q: Why not separate out repositories from packages?
     - A: In practice vendor tools should work with packages, not repositories.
-	 If a vendor tool is able to sniff out the source control version and time
+	 If a vendor tool is able to sniff out the source control revision and time
 	 then that's extra information for a human to manage the package.
 	 Machines only need to know what a package used to be called
 	 (the "Vendor") and what they can be found once copied (the "Local").
-  * Q: Seriously, can't we rely on github to stay around and just pin the version?
+  * Q: Seriously, can't we rely on github to stay around and just pin the revision?
      - A: I've maintained line of business applications that are over 15 years
 	    old. In one case many of the dependent third-party components
 		were no longer available. A re-write eventually took nearly a year to
@@ -279,10 +279,10 @@ solution does not make the problem disappear or make the needs change.
     the GOPATH locations after a fetch? I don't like the idea of import re-writes.
     - A: If you setup one project per GOPATH it would mostly work ("go get"
 		wouldn't work). However, if two projects that shared the same GOPATH
-		relied on the same vendor package, but different versions, then one vendor package
+		relied on the same vendor package, but different revisions, then one vendor package
 		would clobber the other vendor package. This approach doesn't work when scaling
 		a company code base.
- * Q: What about putting the hash or similar version in each package folder path?
+ * Q: What about putting the hash or similar revision in each package folder path?
     - A: I'd be interested to see the tool that took this approach. I'm not
 	    convinced that it would be practical or that it could be done without
 		modifying the "go" command.
