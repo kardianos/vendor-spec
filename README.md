@@ -81,26 +81,28 @@ struct {
 		{
 			"Vendor": "rsc.io/pdf",
 			"Local": "github.com/kardianos/mypkg/internal/rsc.io/pdf",
-			"ImportAs": "Local",
+			"ImportAs": "local",
 			"Revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
 			"RevisionTime": "2014-09-25T17:07:18Z-04:00"
 		},
 		{
 			"Vendor": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
 			"Local": "github.com/kardianos/mypkg/internal/crypto/tls",
-			"ImportAs": "Local",
+			"ImportAs": "local",
 			"Revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
 			"RevisionTime": "2015-04-07T09:07:157Z-07:00"
 		},
 		{
 			"Vendor": "github.com/coreos/etcd/raft",
 			"Local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
+			"ImportAs": "local",
 			"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 		},
 		{
 			"Vendor": "github.com/coreos/etcd/internal/golang.org/x/net/context",
 			"Local": "github.com/kardianos/mypkg/internal/golang.org/x/net/context",
+			"ImportAs": "local",
 			"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"RevisionTime": "2015-04-09T05:06:17Z-08:00"
 		}
@@ -119,50 +121,6 @@ import (
 
 ### Example 2
 Example 2 demonstrates different uses of "ImportAs".
-
-Revision pinning example (Package struct item only):
-```
-{
-	"Vendor": "github.com/coreos/etcd/raft",
-	"Local": "github.com/coreos/etcd/raft",
-	"ImportAs": "vendor",
-	"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"RevisionTime": "2015-04-09T05:06:17Z-08:00"
-}
-```
-
-GOPATH modify (godep save) example (Package struct item only):
-```
-{
-	"Vendor": "github.com/coreos/etcd/raft",
-	"Local": "github.com/kardianos/mypkg/internal/src/github.com/coreos/etcd/raft",
-	"ImportAs": "vendor",
-	"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"RevisionTime": "2015-04-09T05:06:17Z-08:00"
-}
-```
-
-Import path rewrite example (Package struct item only):
-```
-{
-	"Vendor": "github.com/coreos/etcd/raft",
-	"Local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
-	"ImportAs": "local",
-	"Revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"RevisionTime": "2015-04-09T05:06:17Z-08:00"
-}
-```
-
-In all cases the "Local" field points to where the package sits on disk within
-the GOPATH. The "Vendor" field always gives the original vendor's import path.
-
-
-### Proposed addition to support revision pinning and GOPATH modifications
-In each Package struct, add the field "ImportAs string". Valid values are
-"vendor" and "local". If the value is "vendor", then the import path is expected
-to be the value of the "Vendor" field. If the value is "local", the import
-path is expected to be the "Local" field. If the "ImportAs" value is omitted,
-the default will be treated as "vendor".
 
 Revision pinning example (Package struct item only):
 ```
