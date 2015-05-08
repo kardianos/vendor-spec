@@ -29,13 +29,14 @@ go get -u github.com/kardianos/vendor
 
 ```
 struct {
-	// Comment is free text for human use.
-	Comment string
+	// Comment is free text for human use. Example "Revision abc123 introduced
+	// changes that are not backwards compatible, so leave this as def876."
+	Comment string `json:"comment"`
 	
 	Package []struct {
 		// Vendor import path. Example "rsc.io/pdf".
 		// go get <Vendor> should fetch the remote vendor package.
-		Vendor string
+		Vendor string `json:"vendor"`
 		
 		// Package path as found in GOPATH.
 		// Examples: "path/to/mypkg/internal/rsc.io/pdf".
@@ -44,28 +45,28 @@ struct {
 		// 
 		// Local should always use forward slashes and must not contain the
 		// path elements "." or "..".
-		Local string
+		Local string `json:"local"`
 		
 		// ImportAs records what field should be used in the import path.
 		// Possible values are: "vendor" or "local". If omitted the value
 		// implies "vendor". If the value is "vendor" the import path should
 		// be the Vendor field. If the value is "local" the import path should
 		// be the Local field.
-		ImportAs string
+		ImportAs string `json:"importAs"`
 		
 		// The revision of the package. This field must be persisted by all
 		// tools, but not all tools will interpret this field.
 		// The value of Revision should be a single value that can be used
 		// to fetch the same or similar revision.
 		// Examples: "abc104...438ade0", "v1.3.5"
-		Revision string
+		Revision string `jason:"revision"`
 		
 		// RevisionTime is the time the revision was created. The time should be
 		// parsed and written in the "time.RFC3339" format.
-		RevisionTime string
+		RevisionTime string `json:"revisionString"`
 		
 		// Comment is free text for human use.
-		Comment string
+		Comment string `json:"comment"`
 	}
 }
 ```
@@ -77,34 +78,39 @@ struct {
 
 ```
 {
+	"comment",
 	"package": [
 		{
 			"vendor": "rsc.io/pdf",
 			"local": "github.com/kardianos/mypkg/internal/rsc.io/pdf",
 			"importAs": "local",
 			"revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
-			"revisionTime": "2014-09-25T17:07:18Z-04:00"
+			"revisionTime": "2014-09-25T17:07:18Z-04:00",
+			"comment": ""
 		},
 		{
 			"vendor": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
 			"local": "github.com/kardianos/mypkg/internal/crypto/tls",
 			"importAs": "local",
 			"revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
-			"revisionTime": "2015-04-07T09:07:157Z-07:00"
+			"revisionTime": "2015-04-07T09:07:157Z-07:00",
+			"comment": ""
 		},
 		{
 			"vendor": "github.com/coreos/etcd/raft",
 			"local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
 			"importAs": "local",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"revisionTime": "2015-04-09T05:06:17Z-08:00"
+			"revisionTime": "2015-04-09T05:06:17Z-08:00",
+			"comment": ""
 		},
 		{
 			"vendor": "github.com/coreos/etcd/internal/golang.org/x/net/context",
 			"local": "github.com/kardianos/mypkg/internal/golang.org/x/net/context",
 			"importAs": "local",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"revisionTime": "2015-04-09T05:06:17Z-08:00"
+			"revisionTime": "2015-04-09T05:06:17Z-08:00",
+			"comment": ""
 		}
 	]
 }
