@@ -32,39 +32,39 @@ struct {
 	// Comment is free text for human use. Example "Revision abc123 introduced
 	// changes that are not backwards compatible, so leave this as def876."
 	Comment string `json:"comment"`
-	
+
 	Package []struct {
 		// Vendor import path. Example "rsc.io/pdf".
 		// go get <Vendor> should fetch the remote vendor package.
 		Vendor string `json:"vendor"`
-		
+
 		// Package path as found in GOPATH.
 		// Examples: "path/to/mypkg/internal/rsc.io/pdf".
 		// If Local is an empty string, the tool should assume the
 		// package is not currently copied locally.
-		// 
+		//
 		// Local should always use forward slashes and must not contain the
 		// path elements "." or "..".
 		Local string `json:"local"`
-		
+
 		// ImportAs records what field should be used in the import path.
 		// Possible values are: "vendor" or "local". If omitted the value
 		// implies "vendor". If the value is "vendor" the import path should
 		// be the Vendor field. If the value is "local" the import path should
 		// be the Local field.
 		ImportAs string `json:"importAs"`
-		
+
 		// The revision of the package. This field must be persisted by all
 		// tools, but not all tools will interpret this field.
 		// The value of Revision should be a single value that can be used
 		// to fetch the same or similar revision.
 		// Examples: "abc104...438ade0", "v1.3.5"
-		Revision string `jason:"revision"`
-		
+		Revision string `json:"revision"`
+
 		// RevisionTime is the time the revision was created. The time should be
 		// parsed and written in the "time.RFC3339" format.
 		RevisionTime string `json:"revisionString"`
-		
+
 		// Comment is free text for human use.
 		Comment string `json:"comment"`
 	}
