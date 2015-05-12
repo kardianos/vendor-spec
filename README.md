@@ -1,9 +1,5 @@
 ## The Go vendor file specification
 
-The tool that implements this specification can be installed by running:
-```
-go get -u github.com/kardianos/vendor
-```
 
 ### Specification
  * Copying third-party vendor packages into a local project structure requires
@@ -14,7 +10,6 @@ go get -u github.com/kardianos/vendor
  * The vendor file will be in the "internal" folder and be called "vendor.json".
  * The vendor file describes the vendor's packages rooted in the same "internal"
     folder.
- * The vendor file must contain a minimum set of fields.
  * Additional fields may be added to the vendor file that is tool specific.
  * The vendor file is to be used by a vendor tool; the vendor file is not used
     for compiling source code.
@@ -31,8 +26,10 @@ go get -u github.com/kardianos/vendor
 struct {
 	// Comment is free text for human use. Example "Revision abc123 introduced
 	// changes that are not backwards compatible, so leave this as def876."
-	Comment string `json:"comment"`
+	Comment string `json:"comment,omitempty"`
 
+	// Package represents a collection of vendor packages that have been copied
+	// locally. Each entry represents a single Go package.
 	Package []struct {
 		// Vendor import path. Example "rsc.io/pdf".
 		// go get <Vendor> should fetch the remote vendor package.
@@ -40,19 +37,10 @@ struct {
 
 		// Package path as found in GOPATH.
 		// Examples: "path/to/mypkg/internal/rsc.io/pdf".
-		// If Local is an empty string, the tool should assume the
-		// package is not currently copied locally.
 		//
 		// Local should always use forward slashes and must not contain the
 		// path elements "." or "..".
 		Local string `json:"local"`
-
-		// ImportAs records what field should be used in the import path.
-		// Possible values are: "vendor" or "local". If omitted the value
-		// implies "vendor". If the value is "vendor" the import path should
-		// be the Vendor field. If the value is "local" the import path should
-		// be the Local field.
-		ImportAs string `json:"importAs"`
 
 		// The revision of the package. This field must be persisted by all
 		// tools, but not all tools will interpret this field.
@@ -66,51 +54,47 @@ struct {
 		RevisionTime string `json:"revisionString"`
 
 		// Comment is free text for human use.
-		Comment string `json:"comment"`
-	}
+		Comment string `json:"comment,omitempty"`
+	} `json:"package"`
 }
 ```
 
-### Example 1
+### Example
 *vendor file path: "$GOPATH/src/github.com/kardianos/mypkg/internal/vendor.json"*
 
 *first package copied to: "$GOPATH/src/github.com/kardianos/mypkg/internal/rsc.io/pdf"*
 
 ```
 {
-	"comment",
+	"comment": "Note the use of a non-standard crypto package.",
 	"package": [
 		{
 			"vendor": "rsc.io/pdf",
 			"local": "github.com/kardianos/mypkg/internal/rsc.io/pdf",
-			"importAs": "local",
 			"revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
-			"revisionTime": "2014-09-25T17:07:18Z-04:00",
-			"comment": ""
+			"revisionTime": "2014-09-25T17:07:18Z-04:00"
 		},
 		{
-			"vendor": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
+			"vendor": "crypto/tls",
 			"local": "github.com/kardianos/mypkg/internal/crypto/tls",
-			"importAs": "local",
 			"revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
 			"revisionTime": "2015-04-07T09:07:157Z-07:00",
-			"comment": ""
+			"originPath": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
+			"originURL": "https://github.com/Azure/azure-sdk-for-go.git"
 		},
 		{
 			"vendor": "github.com/coreos/etcd/raft",
 			"local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
-			"importAs": "local",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"revisionTime": "2015-04-09T05:06:17Z-08:00",
-			"comment": ""
+			"revisionTime": "2015-04-09T05:06:17Z-08:00"
 		},
 		{
-			"vendor": "github.com/coreos/etcd/internal/golang.org/x/net/context",
+			"vendor": "golang.org/x/net/context",
 			"local": "github.com/kardianos/mypkg/internal/golang.org/x/net/context",
-			"importAs": "local",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"revisionTime": "2015-04-09T05:06:17Z-08:00",
-			"comment": ""
+			"originPath": "github.com/coreos/etcd/internal/golang.org/x/net/context",
+			"comment": "Use the 25f1 version."
 		}
 	]
 }
@@ -124,45 +108,6 @@ import (
 	"github.com/kardianos/mypkg/internal/golang.org/x/net/context"
 )
 ```
-
-### Example 2
-Example 2 demonstrates different uses of "importAs".
-
-Revision pinning example (Package struct item only):
-```
-{
-	"vendor": "github.com/coreos/etcd/raft",
-	"local": "github.com/coreos/etcd/raft",
-	"importAs": "vendor",
-	"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"revisionTime": "2015-04-09T05:06:17Z-08:00"
-}
-```
-
-GOPATH modify (godep save) example (Package struct item only):
-```
-{
-	"vendor": "github.com/coreos/etcd/raft",
-	"local": "github.com/kardianos/mypkg/internal/src/github.com/coreos/etcd/raft",
-	"importAs": "vendor",
-	"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"revisionTime": "2015-04-09T05:06:17Z-08:00"
-}
-```
-
-Import path rewrite example (Package struct item only):
-```
-{
-	"vendor": "github.com/coreos/etcd/raft",
-	"local": "github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft",
-	"importAs": "local",
-	"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-	"revisionTime": "2015-04-09T05:06:17Z-08:00"
-}
-```
-
-In all cases the "local" field points to where the package sits on disk within
-the GOPATH. The "vendor" field always gives the original vendor's import path.
 
 ### Vendor and Local fields
 The Vendor field is the path that would be used to fetch the non-copied revision
@@ -190,3 +135,37 @@ value that can be used to fetch a specific revision. The RevisionTime must be
 empty or have a valid RFC3339 time string. If the Revision field is non-empty
 the RevisionTime field must correlate with the Revision field. If the Revision
 field is empty the meaning of the RevisionTime field is tool specific.
+
+### Well known fields used by tools
+package.originPath : path relative to GOPATH where files were copied from if
+ different from the vendor path.
+
+package.originURL : URL to fetch remote revision from.
+
+### Alternate check to verify single package import
+When a package is rewritten it loses the original import path. This can lead
+the possibility of importing the same package multiple times. An additional
+check a tool may imply is to use package vendor comments. This is a comment
+very similar to the package import comment as they both contain the original
+vendor import path.
+
+For example any one of these files:
+```
+file example path A: company/third_party/context/doc.go
+file example path B: github.com/user/mypkg/internal/v/context/doc.go
+file example path C: github.com/user/mypkg/internal/golang.org/x/net/context/doc.go
+```
+Could have the following package vendor comment.
+```
+package context // vendor "golang.org/x/net/context"
+```
+
+This comment will be ignored by the go build tool. A vendor tool may use
+this comment as an additional check to prevent duplicate packages in cases
+where the vendor packages are copied locally, but not under the local project.
+
+If the package vendor comment and the vendor file are in conflict the tool must
+stop and report the discrepancy. If there are two package with the same
+package vendor comment the vendor tool must stop and report the issue. If
+vendor package comment is the same as a used import path the vendor tool must
+stop and report the issue.
