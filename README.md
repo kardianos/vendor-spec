@@ -34,9 +34,9 @@ struct {
 	// Package represents a collection of vendor packages that have been copied
 	// locally. Each entry represents a single Go package.
 	Package []struct {
-		// Vendor import path. Example "rsc.io/pdf".
-		// go get <Vendor> should fetch the remote vendor package.
-		Vendor string `json:"vendor"`
+		// Canonical import path. Example "rsc.io/pdf".
+		// go get <Canonical> should fetch the remote package.
+		Canonical string `json:"canonical"`
 
 		// Package path relative to the vendor file.
 		// Examples: "vendor/rsc.io/pdf".
@@ -72,14 +72,14 @@ struct {
 	"comment": "Note the use of a non-standard crypto package.",
 	"package": [
 		{
-			"vendor": "rsc.io/pdf",
+			"canonical": "rsc.io/pdf",
 			"local": "vendor/rsc.io/pdf",
 			"revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
 			"revisionTime": "2014-09-25T17:07:18Z-04:00",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/rsc.io/pdf"
 		},
 		{
-			"vendor": "crypto/tls",
+			"canonical": "crypto/tls",
 			"local": "vendor/crypto/tls",
 			"revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
 			"revisionTime": "2015-04-07T09:07:157Z-07:00",
@@ -88,14 +88,14 @@ struct {
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/crypto/tls"
 		},
 		{
-			"vendor": "github.com/coreos/etcd/raft",
+			"canonical": "github.com/coreos/etcd/raft",
 			"local": "internal/github.com/coreos/etcd/raft",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"revisionTime": "2015-04-09T05:06:17Z-08:00",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft"
 		},
 		{
-			"vendor": "golang.org/x/net/context",
+			"canonical": "golang.org/x/net/context",
 			"local": "context",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"revisionTime": "2015-04-09T05:06:17Z-08:00",
@@ -115,8 +115,8 @@ import (
 )
 ```
 
-### Vendor and Local fields
-The Vendor field is the path that would be used to fetch the non-copied revision
+### Canonical and Local fields
+The Canonical field is the path that would be used to fetch the non-copied revision
 from GOPATH, the "go get" path. The Local field is the path to the package
 relative to the vendor file. The Local field may not have the path elements
 "." or ".." and as such vendor packages must be under the vendor file.
@@ -144,16 +144,16 @@ field is empty the meaning of the RevisionTime field is tool specific.
 
 ### Well known fields used by tools
 package.originPath : path relative to GOPATH where files were copied from if
- different from the vendor path.
+ different from the canonical path.
 
 package.originURL : URL to fetch remote revision from.
 
 ### Alternate check to verify single package import
 When a package is rewritten it loses the original import path. This can lead
 the possibility of importing the same package multiple times. An additional
-check a tool may imply is to use package vendor comments. This is a comment
+check a tool may imply is to use package canonical comments. This is a comment
 very similar to the package import comment as they both contain the original
-vendor import path.
+canonical import path.
 
 For example any one of these files:
 ```
@@ -161,17 +161,17 @@ file example path A: company/third_party/context/doc.go
 file example path B: github.com/user/mypkg/internal/v/context/doc.go
 file example path C: github.com/user/mypkg/internal/golang.org/x/net/context/doc.go
 ```
-Could have the following package vendor comment.
+Could have the following package canonical comment.
 ```
-package context // vendor "golang.org/x/net/context"
+package context // canonical import "golang.org/x/net/context"
 ```
 
 This comment will be ignored by the go build tool. A vendor tool may use
 this comment as an additional check to prevent duplicate packages in cases
 where the vendor packages are copied locally, but not under the local project.
 
-If the package vendor comment and the vendor file are in conflict the tool must
+If the package canonical comment and the vendor file are in conflict the tool must
 stop and report the discrepancy. If there are two package with the same
-package vendor comment the vendor tool must stop and report the issue. If
-vendor package comment is the same as a used import path the vendor tool must
+package canonical comment the vendor tool must stop and report the issue. If
+canonical package comment is the same as a used import path the vendor tool must
 stop and report the issue.
