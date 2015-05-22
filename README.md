@@ -1,6 +1,5 @@
 ## The Go vendor file specification
 
-
 ### Specification
  * Description and purpose:
   - Copying third-party vendor packages into a local project structure requires
@@ -141,37 +140,3 @@ value that can be used to fetch a specific revision. The RevisionTime must be
 empty or have a valid RFC3339 time string. If the Revision field is non-empty
 the RevisionTime field must correlate with the Revision field. If the Revision
 field is empty the meaning of the RevisionTime field is tool specific.
-
-### Well known fields used by tools
-package.originPath : path relative to GOPATH where files were copied from if
- different from the canonical path.
-
-package.originURL : URL to fetch remote revision from.
-
-### Alternate check to verify single package import
-When a package is rewritten it loses the original import path. This can lead
-the possibility of importing the same package multiple times. An additional
-check a tool may imply is to use package canonical comments. This is a comment
-very similar to the package import comment as they both contain the original
-canonical import path.
-
-For example any one of these files:
-```
-file example path A: company/third_party/context/doc.go
-file example path B: github.com/user/mypkg/internal/v/context/doc.go
-file example path C: github.com/user/mypkg/internal/golang.org/x/net/context/doc.go
-```
-Could have the following package canonical comment.
-```
-package context // canonical import "golang.org/x/net/context"
-```
-
-This comment will be ignored by the go build tool. A vendor tool may use
-this comment as an additional check to prevent duplicate packages in cases
-where the vendor packages are copied locally, but not under the local project.
-
-If the package canonical comment and the vendor file are in conflict the tool must
-stop and report the discrepancy. If there are two package with the same
-package canonical comment the vendor tool must stop and report the issue. If
-canonical package comment is the same as a used import path the vendor tool must
-stop and report the issue.
