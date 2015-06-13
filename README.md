@@ -53,7 +53,7 @@ struct {
 
 		// RevisionTime is the time the revision was created. The time should be
 		// parsed and written in the "time.RFC3339" format.
-		RevisionTime string `json:"revisionString"`
+		RevisionTime string `json:"revisionTime"`
 
 		// Comment is free text for human use.
 		Comment string `json:"comment,omitempty"`
