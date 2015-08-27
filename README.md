@@ -74,14 +74,14 @@ struct {
 			"canonical": "rsc.io/pdf",
 			"local": "vendor/rsc.io/pdf",
 			"revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
-			"revisionTime": "2014-09-25T17:07:18Z-04:00",
+			"revisionTime": "2014-09-25T17:07:18-04:00",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/rsc.io/pdf"
 		},
 		{
 			"canonical": "crypto/tls",
 			"local": "vendor/crypto/tls",
 			"revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
-			"revisionTime": "2015-04-07T09:07:157Z-07:00",
+			"revisionTime": "2015-04-07T09:07:15-07:00",
 			"originPath": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
 			"originURL": "https://github.com/Azure/azure-sdk-for-go.git",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/crypto/tls"
@@ -90,14 +90,14 @@ struct {
 			"canonical": "github.com/coreos/etcd/raft",
 			"local": "internal/github.com/coreos/etcd/raft",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"revisionTime": "2015-04-09T05:06:17Z-08:00",
+			"revisionTime": "2015-04-09T05:06:17-08:00",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft"
 		},
 		{
 			"canonical": "golang.org/x/net/context",
 			"local": "context",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
-			"revisionTime": "2015-04-09T05:06:17Z-08:00",
+			"revisionTime": "2015-04-09T05:06:17-08:00",
 			"originPath": "github.com/coreos/etcd/internal/golang.org/x/net/context",
 			"comment": "Use the 25f1 version. Located on disk at $GOPATH/src/github.com/kardianos/mypkg/context"
 		}
