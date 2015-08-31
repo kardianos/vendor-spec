@@ -24,7 +24,7 @@
 
 The following struct describes the minimum fields that must be present in
 the json file:
-```
+```go
 struct {
 	// Comment is free text for human use. Example "Revision abc123 introduced
 	// changes that are not backwards compatible, so leave this as def876."
@@ -66,7 +66,7 @@ struct {
 
 *first package copied to: "$GOPATH/src/github.com/kardianos/mypkg/vendor/rsc.io/pdf"*
 
-```
+```json
 {
 	"comment": "Note the use of a non-standard crypto package.",
 	"package": [
@@ -105,7 +105,7 @@ struct {
 }
 ```
 *The above example would have the import paths as follows:*
-```
+```go
 import (
 	"github.com/kardianos/mypkg/vendor/rsc.io/pdf"
 	"github.com/kardianos/mypkg/vendor/crypto/tls"
