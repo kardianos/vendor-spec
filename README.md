@@ -6,13 +6,14 @@
     a meta-data file describing the vendor's packages.
   - The meta-data file describing the vendor's packages will be referred to as
     the vendor file.
-  - The vendor file is to be used by a vendor tool; the vendor file is not used
-    for compiling source code.
-  - The vendor file may be used to prevent duplicate packages from being
-    included and store the revision of a package.
+  - The vendor file is to be used by a vendor tool or the developer; the vendor
+    file is not used for compiling source code.
  * Vendor File:
-  - The vendor file will be called "vendor.json".
-  - The vendor file describes the vendor's packages under the vendor file.
+  - The vendor file will be called "vendor.json" and be placed in a folder
+    named "vendor".
+  - The vendor file describes the packages in the vendor folder the vendor file is in.
+  - The vendor file does not describe any nested vendor folders; nested vendor
+    folders must contain their own vendor file.
   - The vendor file must be in or under a descendant of the "$GOPATH/src/" directory.
   - Additional fields may be added to the vendor file that is tool specific.
   - Each copied package entry is defined to match a single Go package. A
@@ -22,8 +23,7 @@
     vendor file. A tool may remove unknown fields on an explicit user request.
 	This implies that a tool must not marshal or unmarshal from a known struct.
 
-The following struct describes the minimum fields that must be present in
-the json file:
+The following struct describes well-known fields:
 ```go
 struct {
 	// Comment is free text for human use. Example "Revision abc123 introduced
@@ -33,16 +33,15 @@ struct {
 	// Package represents a collection of vendor packages that have been copied
 	// locally. Each entry represents a single Go package.
 	Package []struct {
-		// Canonical import path. Example "rsc.io/pdf".
-		// go get <Canonical> should fetch the remote package.
-		Canonical string `json:"canonical"`
+		// Import path. Example "rsc.io/pdf".
+		// go get <Path> should fetch the remote package.
+		Path string `json:"path"`
 
-		// Package path relative to the vendor file.
-		// Examples: "vendor/rsc.io/pdf".
-		//
-		// Local should always use forward slashes and must not contain the
-		// path elements "." or "..".
-		Local string `json:"local"`
+		// Origin is an import path where it was copied from. This import path
+		// may contain "vendor" segments.
+		// 
+		// If empty or missing origin is assumed to be the same as the Path field.
+		Origin string `json:"origin"`
 
 		// The revision of the package. This field must be persisted by all
 		// tools, but not all tools will interpret this field.
@@ -62,7 +61,7 @@ struct {
 ```
 
 ### Example
-*vendor file path: "$GOPATH/src/github.com/kardianos/mypkg/vendor.json"*
+*vendor file path: "$GOPATH/src/github.com/kardianos/mypkg/vendor/vendor.json"*
 
 *first package copied to: "$GOPATH/src/github.com/kardianos/mypkg/vendor/rsc.io/pdf"*
 
@@ -71,35 +70,29 @@ struct {
 	"comment": "Note the use of a non-standard crypto package.",
 	"package": [
 		{
-			"canonical": "rsc.io/pdf",
-			"local": "vendor/rsc.io/pdf",
+			"path": "rsc.io/pdf",
 			"revision": "3a3aeae79a3ec4f6d093a6b036c24698938158f3",
 			"revisionTime": "2014-09-25T17:07:18-04:00",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/rsc.io/pdf"
 		},
 		{
-			"canonical": "crypto/tls",
-			"local": "vendor/crypto/tls",
+			"origin": "github.com/MSOpenTech/azure-sdk-for-go/vendor/crypto/tls",
+			"path": "crypto/tls",
 			"revision": "80a4e93853ca8af3e273ac9aa92b1708a0d75f3a",
 			"revisionTime": "2015-04-07T09:07:15-07:00",
-			"originPath": "github.com/MSOpenTech/azure-sdk-for-go/internal/crypto/tls",
-			"originURL": "https://github.com/Azure/azure-sdk-for-go.git",
 			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/crypto/tls"
 		},
 		{
-			"canonical": "github.com/coreos/etcd/raft",
-			"local": "internal/github.com/coreos/etcd/raft",
+			"path": "github.com/coreos/etcd/raft",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"revisionTime": "2015-04-09T05:06:17-08:00",
-			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft"
+			"comment": "located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/github.com/coreos/etcd/raft"
 		},
 		{
-			"canonical": "golang.org/x/net/context",
-			"local": "context",
+			"path": "golang.org/x/net/context",
 			"revision": "25f1feceb5e13da68a35ee552069f86d18d63fee",
 			"revisionTime": "2015-04-09T05:06:17-08:00",
-			"originPath": "github.com/coreos/etcd/internal/golang.org/x/net/context",
-			"comment": "Use the 25f1 version. Located on disk at $GOPATH/src/github.com/kardianos/mypkg/context"
+			"comment": "Use the 25f1 version. Located on disk at $GOPATH/src/github.com/kardianos/mypkg/vendor/golang.org/x/net/context"
 		}
 	]
 }
@@ -107,32 +100,24 @@ struct {
 *The above example would have the import paths as follows:*
 ```go
 import (
-	"github.com/kardianos/mypkg/vendor/rsc.io/pdf"
-	"github.com/kardianos/mypkg/vendor/crypto/tls"
-	"github.com/kardianos/mypkg/internal/github.com/coreos/etcd/raft"
-	"github.com/kardianos/mypkg/context"
+	"rsc.io/pdf"
+	"crypto/tls"
+	"github.com/coreos/etcd/raft"
+	"golang.org/x/net/context"
 )
 ```
 
-### Canonical and Local fields
-The Canonical field is the path that would be used to fetch the non-copied revision
-from GOPATH, the "go get" path. The Local field is the path to the package
-relative to the vendor file. The Local field may not have the path elements
-"." or ".." and as such vendor packages must be under the vendor file.
+### Package.Path and Package.Origin fields
+The Path field identifies the package with the import path. The package it
+describes will be rooted in the same vendor folder as the vendor file and be
+located at "Path" relative to the vendor folder.
 
-While it is usually ideal to not vendor a package that also vendors packages,
-there are cases where there are no other options. Sometimes useful packages
-are developed in the context of an executable. Sometimes it is useful to make
-modifications to the standard library and vendor them with a package. This is
-what the azure sdk and heartbleed detectors do.
-
-By separating out the remote (go get) path from the local internal path,
-a tool can detect when a standard library package is vendored and take steps
-to prevent duplicating imports. Without the Local field a tool will be unable
-to re-write the import path to be shorter without losing information.
+The Origin field contains the import path of the package it was copied from.
+If this field is empty or not present it is assumed to be the same as the Path
+field. This field is useful when updating dependencies.
 
 ### Revision and RevisionTime fields
-Both revision fields are optional. However tools must persist any information
+Both revision and revisionTime fields are optional. However tools must persist any information
 present in them. The interpretation of both fields is dependent on the tool
 itself. While the exact interpretation of the fields are tool specific, the
 semantics are not. The Revision field must either be empty or contain a single
