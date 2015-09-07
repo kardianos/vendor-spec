@@ -125,3 +125,6 @@ value that can be used to fetch a specific revision. The RevisionTime must be
 empty or have a valid RFC3339 time string. If the Revision field is non-empty
 the RevisionTime field must correlate with the Revision field. If the Revision
 field is empty the meaning of the RevisionTime field is tool specific.
+
+## List of tools that support this specification
+ * [github.com/kardianos/govendor](https://github.com/kardianos/govendor)
